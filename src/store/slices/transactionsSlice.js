@@ -3,9 +3,10 @@ import { createSlice } from "@reduxjs/toolkit";
 const transactionsSlice = createSlice({
   name: "transactions",
   initialState: {
-    balance: 12380.51,
+    balance: 2380.51,
     totalIncome: 0.00,
     totalPayment: 0.00,
+    editTransaction: "",
     transactions: [],
   },
   reducers: {
@@ -23,18 +24,24 @@ const transactionsSlice = createSlice({
       state.transactions.push(action.payload);
     },
 
-    editTransaction: (state, action) => {
-      const { id, updatedTransaction } = action.payload;
-      return {
-        ...state,
-        transactions: state.transactions.map((transaction) => {
-          if (transaction.id === id) {
-            return { ...transaction, ...updatedTransaction };
-          }
-          return transaction;
-        }),
-      };
+    rememberEditTransaction: (state, action) => {
+      state.editTransaction = action.payload;
     },
+
+    toggleEditMenuOpen: (state) => {
+      state.editMenuOpen = !state.editMenuOpen;
+    },
+
+    editTransactions: (state, action) => {
+      const { updatedTransaction } = action.payload;
+      state.transactions = state.transactions.map((transaction) => {
+        if (transaction.id === updatedTransaction.id) {
+          return { ...updatedTransaction };
+        }
+        return { ...transaction };
+      });
+    },
+
     deleteTransaction: (state, action) => {
       const transactionToDelete = action.payload;
       return {
@@ -47,6 +54,8 @@ const transactionsSlice = createSlice({
   },
 });
 
-export const { addTransaction, editTransaction, deleteTransaction } = transactionsSlice.actions;
+export const {
+  addTransaction, rememberEditTransaction, editTransactions, deleteTransaction, toggleEditMenuOpen,
+} = transactionsSlice.actions;
 
 export default transactionsSlice.reducer;

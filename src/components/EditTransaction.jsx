@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { useDispatch } from "react-redux";
+import React, { useState, useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import dayjs from "dayjs";
 import { Formik, Form, Field } from "formik";
 import { TextField } from "formik-material-ui";
@@ -9,14 +9,21 @@ import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { DateTimePicker } from "@mui/x-date-pickers/DateTimePicker";
 
-import { addTransaction } from "../store/slices/transactionsSlice";
+import {
+  editTransactions,
+  toggleEditMenuOpen,
+} from "../store/slices/transactionsSlice";
 
 import Title from "./Title";
 
-const AddNewTransaction = () => {
+const EditTransaction = () => {
   const dispatch = useDispatch();
+  const editMenuOpen = useSelector((state) => state.transactions.editMenuOpen);
+  const editTransaction = useSelector(
+    (state) => state.transactions.editTransaction,
+  );
   const [transactionDate, setTransactionDate] = useState(dayjs());
-  const [transactionType, setTransactionType] = useState("");
+  const [editTransactionType, setTransactionType] = useState("");
 
   const handleTransactionTypeChange = (value, formik) => {
     setTransactionType(value);
@@ -24,18 +31,31 @@ const AddNewTransaction = () => {
   };
 
   return (
-    <div className="AddNewTransaction">
-      <div className="AddNewTransaction__title">
-        <Title label="Add New Transaction" />
+    <div className={`EditTransaction ${editMenuOpen ? "open" : "close"}`}>
+      <div className="EditTransaction__title">
+        <Title label="Edit Transaction" />
       </div>
       <Formik
+        enableReinitialize
         initialValues={{
-          transactionName: "",
-          transactionDescription: "",
-          transactionCategory: "",
-          transactionAmount: "",
-          transactionType: "",
-          transactionDate: transactionDate.format("YYYY-MM-DDTHH:mm"),
+          transactionName: editTransaction
+            ? editTransaction.transactionName
+            : "",
+          transactionDescription: editTransaction
+            ? editTransaction.transactionDescription
+            : "",
+          transactionCategory: editTransaction
+            ? editTransaction.transactionCategory
+            : "",
+          transactionAmount: editTransaction
+            ? editTransaction.transactionAmount
+            : "",
+          transactionType: editTransaction
+            ? editTransaction.transactionType
+            : "",
+          transactionDate: editTransaction
+            ? editTransaction.transactionDate
+            : transactionDate.format("YYYY-MM-DDTHH:mm"),
         }}
         validate={(values) => {
           const errors = {};
@@ -54,26 +74,26 @@ const AddNewTransaction = () => {
             errors.transactionType = "Required";
           }
           if (
-            !values.transactionCategory
-            && values.transactionType === "expense"
+            !values.transactionCategory && values.transactionType === "expense"
           ) {
             errors.transactionCategory = "Required";
           }
           return errors;
         }}
-        onSubmit={(values, { resetForm }) => {
-          const transactionData = {
-            id: Date.now(),
+        onSubmit={(values, { setSubmitting }) => {
+          const updatedTransaction = {
+            id: editTransaction.id,
             ...values,
             transactionDate: transactionDate.format("YYYY-MM-DDTHH:mm"),
           };
-          dispatch(addTransaction(transactionData));
-          resetForm();
+          dispatch(editTransactions({ updatedTransaction }));
+          dispatch(toggleEditMenuOpen());
+          setSubmitting(false);
         }}
       >
         {({ isSubmitting, ...formik }) => (
-          <Form className="AddNewTransaction__form">
-            <div className="AddNewTransaction__form-element">
+          <Form className="EditTransaction__form">
+            <div className="EditTransaction__form-element">
               <Field
                 component={TextField}
                 className="CustomTextField"
@@ -91,7 +111,7 @@ const AddNewTransaction = () => {
                 name="transactionName"
               />
             </div>
-            <div className="AddNewTransaction__form-element">
+            <div className="EditTransaction__form-element">
               <Field
                 component={TextField}
                 className="CustomTextField"
@@ -109,7 +129,7 @@ const AddNewTransaction = () => {
                 name="transactionDescription"
               />
             </div>
-            <div className="AddNewTransaction__form-element">
+            <div className="EditTransaction__form-element">
               <Field
                 component={TextField}
                 className="CustomTextField"
@@ -128,7 +148,7 @@ const AddNewTransaction = () => {
                 name="transactionAmount"
               />
             </div>
-            <div className="AddNewTransaction__form-element">
+            <div className="EditTransaction__form-element">
               <Field
                 component={TextField}
                 className="CustomTextField"
@@ -157,7 +177,9 @@ const AddNewTransaction = () => {
                     getContentAnchorEl: null,
                   },
                 }}
-                onChange={(event) => (handleTransactionTypeChange(event.target.value, formik))}
+                onChange={(event) => (
+                  handleTransactionTypeChange(event.target.value, formik)
+                )}
                 name="transactionType"
               >
                 <MenuItem value="" disabled>
@@ -167,8 +189,8 @@ const AddNewTransaction = () => {
                 <MenuItem value="expense">Expense</MenuItem>
               </Field>
             </div>
-            {transactionType === "expense" && (
-              <div className="AddNewTransaction__form-element">
+            {editTransactionType === "expense" && (
+              <div className="EditTransaction__form-element">
                 <Field
                   component={TextField}
                   className="CustomTextField"
@@ -215,7 +237,7 @@ const AddNewTransaction = () => {
                 </Field>
               </div>
             )}
-            <div className="AddNewTransaction__form-element">
+            <div className="EditTransaction__form-element">
               <LocalizationProvider dateAdapter={AdapterDayjs}>
                 <DateTimePicker
                   className="StyledDateTimePicker"
@@ -224,7 +246,7 @@ const AddNewTransaction = () => {
                 />
               </LocalizationProvider>
             </div>
-            <div className="AddNewTransaction__form-button">
+            <div className="EditTransaction__form-button">
               <Button type="submit">Submit</Button>
             </div>
           </Form>
@@ -234,4 +256,4 @@ const AddNewTransaction = () => {
   );
 };
 
-export default AddNewTransaction;
+export default EditTransaction;

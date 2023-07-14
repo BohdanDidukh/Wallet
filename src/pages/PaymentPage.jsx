@@ -2,6 +2,7 @@ import React from "react";
 
 import PaymentList from "../components/PaymentList";
 import Title from "../components/Title";
+import EditTransaction from "../components/EditTransaction";
 
 const PaymentPage = () => (
   <div className="PaymentPage">
@@ -10,6 +11,7 @@ const PaymentPage = () => (
         <Title label="List of Payment Transactions" />
       </div>
       <PaymentList />
+      <EditTransaction />
     </div>
   </div>
 );

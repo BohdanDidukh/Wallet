@@ -1,11 +1,11 @@
 import React from "react";
 import { useDispatch } from "react-redux";
 
-import { deleteTransaction } from "../store/slices/transactionsSlice";
+import { deleteTransaction, rememberEditTransaction, toggleEditMenuOpen } from "../store/slices/transactionsSlice";
 
 import SvgIcons from "./SvgIcons";
 
-const TransactionCard = ({ id, transaction }) => {
+const TransactionCard = ({ transaction }) => {
   const dispatch = useDispatch();
   const {
     transactionName,
@@ -17,6 +17,10 @@ const TransactionCard = ({ id, transaction }) => {
 
   const handleDelete = () => {
     dispatch(deleteTransaction(transaction));
+  };
+  const handleEdit = () => {
+    dispatch(rememberEditTransaction(transaction));
+    dispatch(toggleEditMenuOpen());
   };
 
   return (
@@ -35,7 +39,7 @@ const TransactionCard = ({ id, transaction }) => {
         </div>
       </div>
       <div className="TransactionCard__actions">
-        <button type="button" className="TransactionCard__button">
+        <button type="button" className="TransactionCard__button" onClick={handleEdit}>
           Change
           <SvgIcons className="TransactionCard__actions-icon" name="edit" />
         </button>

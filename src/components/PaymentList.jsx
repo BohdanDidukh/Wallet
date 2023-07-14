@@ -1,13 +1,19 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
 
 import TransactionCard from "./TransactionCard";
 
 const PaymentList = () => {
   const transactions = useSelector((state) => state.transactions.transactions);
-  const sortedTransactions = transactions
-    .filter((transaction) => transaction.transactionType === "expense")
-    .sort((a, b) => new Date(b.transactionDate) - new Date(a.transactionDate));
+  const [sortedTransactions, setSortedTransactions] = useState([]);
+
+  useEffect(() => {
+    const sorted = transactions
+      .filter((transaction) => transaction.transactionType === "expense")
+      .sort((a, b) => new Date(b.transactionDate) - new Date(a.transactionDate));
+
+    setSortedTransactions(sorted);
+  }, [transactions]);
 
   return (
     <div className="Transaction__list">
@@ -15,7 +21,6 @@ const PaymentList = () => {
         sortedTransactions.map((transaction) => (
           <TransactionCard
             key={transaction.id}
-            id={transaction.id}
             transaction={transaction}
           />
         ))
